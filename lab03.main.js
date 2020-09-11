@@ -32,7 +32,7 @@ const { getIpv4MappedIpv6Address } = require(path.join(__dirname, 'ipv6.js'));
  *                 dotted-quad IPv4 address, such as 10.10.10.1.  The ipv6
  *                 property will be an IPv6 address, such as 0:0:0:0:0:ffff:0a0a:0a01.
  */
- getFirstIpAddress(cidrStr, callback) 
+function getFirstIpAddress(cidrStr, callback) {
 
   let firstIpAddress = {
     ipv4: null,
@@ -56,13 +56,30 @@ const { getIpv4MappedIpv6Address } = require(path.join(__dirname, 'ipv6.js'));
     firstIpAddress.ipv6 = getIpv4MappedIpv6Address(firstIpAddress.ipv4);
   }
   return callback(firstIpAddress, callbackError);
-
+}
 
 /*
   This section is used to test function and log any errors.
   We will make several positive and negative tests.
 */
+function main() {
 
+  let sampleCidrs = ['172.16.10.0/24', '172.16.10.0 255.255.255.0', '172.16.10.128/25', '192.168.1.216/30'];
+  let sampleCidrsLen = sampleCidrs.length;
+
+  let sampleIpv4s = [ '172.16.10.1', '172.16.10.0/24', '172.16.10.0 255.255.255.0', '172.16.256.1', '1.1.1.-1'];
+  let sampleIpv4sLen = sampleIpv4s.length;
+
+  // Iterate over sampleCidrs and pass the element's value to getFirstIpAddress().
+  for (let i = 0; i < sampleCidrsLen; i++) {
+    console.log(`\n--- Test Number ${i + 1} getFirstIpAddress(${sampleCidrs[i]}) ---`);
+    getFirstIpAddress(sampleCidrs[i], (data, error) => {
+      if (error) {
+        console.error(`  Error returned from GET request: ${error}`);
+      }
+      console.log('  Response returned from GET request: ' + JSON.stringify(data));
+    });
+  }
   // Iterate over sampleIpv4s and pass the element's value to getIpv4MappedIpv6Address().
   for (let i = 0; i < sampleIpv4sLen; i++) {
     console.log(`\n--- Test Number ${i + 1} getIpv4MappedIpv6Address(${sampleIpv4s[i]}) ---`);
@@ -74,17 +91,11 @@ const { getIpv4MappedIpv6Address } = require(path.join(__dirname, 'ipv6.js'));
       console.error(`  Problem converting IPv4 ${sampleIpv4s[i]} into a mapped IPv6 address.`);
     }
   }
-
-
-
-class IpAddress {
-  constructor() {
-    // IAP's global log object is used to output errors, warnings, and other
-    // information to the console, IAP's log files, or a Syslog server.
-    // For more information, consult the Log Class guide on the Itential
-    // Developer Hub https://developer.itential.io/ located
-    // under Documentation -> Developer Guides -> Log Class Guide
-    log.info('Starting the IpAddress product.');
-  }
 }
-module.exports = new IpAddress;
+
+
+
+/*
+  Call main to run it.
+*/
+main();
